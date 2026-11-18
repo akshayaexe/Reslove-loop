@@ -1,0 +1,354 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Global safety net: default deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Primitive helpers
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isVerified() {
+      return isSignedIn() && request.auth.token.email_verified == true;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() >= 1 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    // Validation Blueprint: UserProfile
+    function isValidUserProfile(data) {
+      return data.uid is string
+        && isValidId(data.uid)
+        && data.uid == request.auth.uid
+        && data.fullName is string && data.fullName.size() >= 1 && data.fullName.size() <= 120
+        && data.email is string && data.email.size() >= 3 && data.email.size() <= 180
+        && data.mobileNumber is string && data.mobileNumber.size() <= 32
+        && data.dateOfBirth is string && data.dateOfBirth.size() <= 20
+        && data.occupation is string && data.occupation.size() <= 100
+        && data.location is string && data.location.size() <= 100
+        && data.notifyEmail is bool
+        && data.notifySms is bool
+        && data.notifyPromise is bool
+        && data.notifyCommunity is bool
+        && data.createdAt is timestamp
+        && data.updatedAt is timestamp;
+    }
+
+    function hasValidUserProfileKeysOnCreate(data) {
+      return data.keys().hasAll([
+          'uid', 'fullName', 'email', 'mobileNumber', 'dateOfBirth',
+          'occupation', 'location', 'notifyEmail', 'notifySms',
+          'notifyPromise', 'notifyCommunity', 'createdAt', 'updatedAt'
+        ])
+        && data.keys().hasOnly([
+          'uid', 'fullName', 'email', 'mobileNumber', 'dateOfBirth',
+          'occupation', 'location', 'notifyEmail', 'notifySms',
+          'notifyPromise', 'notifyCommunity', 'createdAt', 'updatedAt'
+        ]);
+    }
+
+    // Validation Blueprint: Complaint
+    function isValidComplaintPriority(priority) {
+      return priority in ['Low', 'Medium', 'High', 'Critical'];
+    }
+
+    function isValidComplaintStatus(status) {
+      return status in ['Draft', 'In Progress', 'Awaiting Confirmation', 'Resolved', 'Escalated'];
+    }
+
+    function isValidStringList(arr, maxLen) {
+      return arr is list && arr.size() <= maxLen && (arr.size() == 0 || arr[0] is string);
+    }
+
+    function isValidComplaint(data) {
+      return data.userId is string
+        && isValidId(data.userId)
+        && data.userId == request.auth.uid
+        && data.ticketCode is string && data.ticketCode.size() >= 3 && data.ticketCode.size() <= 32
+        && data.title is string && data.title.size() >= 1 && data.title.size() <= 160
+        && data.category is string && data.category.size() >= 1 && data.category.size() <= 80
+        && data.orderId is string && data.orderId.size() <= 64
+        && data.description is string && data.description.size() >= 1 && data.description.size() <= 2000
+        && isValidComplaintPriority(data.priority)
+        && isValidComplaintStatus(data.status)
+        && data.currentStep is int && data.currentStep >= 1 && data.currentStep <= 6
+        && data.assignedAgentName is string && data.assignedAgentName.size() <= 100
+        && data.assignedAgentRole is string && data.assignedAgentRole.size() <= 100
+        && data.assignedAgentRating is number && data.assignedAgentRating >= 0 && data.assignedAgentRating <= 5
+        && data.aiClassification is string && data.aiClassification.size() <= 120
+        && data.aiClarityScore is int && data.aiClarityScore >= 0 && data.aiClarityScore <= 100
+        && data.aiSuggestion is string && data.aiSuggestion.size() <= 500
+        && data.estimatedResolution is string && data.estimatedResolution.size() <= 80
+        && data.assignedTeam is string && data.assignedTeam.size() <= 100
+        && isValidStringList(data.attachments, 10)
+        && data.latestUpdateNote is string && data.latestUpdateNote.size() <= 500
+        && isValidStringList(data.resolutionSummary, 10)
+        && data.rating is int && data.rating >= 0 && data.rating <= 5
+        && data.feedbackText is string && data.feedbackText.size() <= 1000
+        && data.resolvedInDays is int && data.resolvedInDays >= 0 && data.resolvedInDays <= 3650
+        && data.createdAt is timestamp
+        && data.updatedAt is timestamp;
+    }
+
+    function hasValidComplaintKeysOnCreate(data) {
+      return data.keys().hasAll([
+          'userId', 'ticketCode', 'title', 'category', 'orderId', 'description',
+          'priority', 'status', 'currentStep', 'assignedAgentName', 'assignedAgentRole',
+          'assignedAgentRating', 'aiClassification', 'aiClarityScore', 'aiSuggestion',
+          'estimatedResolution', 'assignedTeam', 'attachments', 'latestUpdateNote',
+          'resolutionSummary', 'rating', 'feedbackText', 'resolvedInDays',
+          'createdAt', 'updatedAt'
+        ])
+        && data.keys().hasOnly([
+          'userId', 'ticketCode', 'title', 'category', 'orderId', 'description',
+          'priority', 'status', 'currentStep', 'assignedAgentName', 'assignedAgentRole',
+          'assignedAgentRating', 'aiClassification', 'aiClarityScore', 'aiSuggestion',
+          'estimatedResolution', 'assignedTeam', 'attachments', 'latestUpdateNote',
+          'resolutionSummary', 'rating', 'feedbackText', 'resolvedInDays',
+          'createdAt', 'updatedAt'
+        ]);
+    }
+
+    // Validation Blueprint: ComplaintEvent
+    function isValidComplaintEvent(data) {
+      return data.userId is string
+        && isValidId(data.userId)
+        && data.userId == request.auth.uid
+        && data.title is string && data.title.size() >= 1 && data.title.size() <= 160
+        && data.description is string && data.description.size() >= 1 && data.description.size() <= 500
+        && data.senderType in ['system', 'agent', 'customer', 'ai']
+        && data.senderName is string && data.senderName.size() >= 1 && data.senderName.size() <= 100
+        && data.tag is string && data.tag.size() <= 80
+        && data.createdAt is timestamp;
+    }
+
+    function hasValidEventKeysOnCreate(data) {
+      return data.keys().hasAll([
+          'userId', 'title', 'description', 'senderType', 'senderName', 'tag', 'createdAt'
+        ])
+        && data.keys().hasOnly([
+          'userId', 'title', 'description', 'senderType', 'senderName', 'tag', 'createdAt'
+        ]);
+    }
+
+    // Validation Blueprint: PromiseItem
+    function isValidPromiseItem(data) {
+      return data.userId is string
+        && isValidId(data.userId)
+        && data.userId == request.auth.uid
+        && data.complaintId is string && isValidId(data.complaintId)
+        && data.ticketCode is string && data.ticketCode.size() >= 3 && data.ticketCode.size() <= 32
+        && data.title is string && data.title.size() >= 1 && data.title.size() <= 160
+        && data.dueDateIso is string && data.dueDateIso.size() >= 10 && data.dueDateIso.size() <= 40
+        && data.progressPercent is int && data.progressPercent >= 0 && data.progressPercent <= 100
+        && data.status in ['Active', 'Kept', 'At Risk', 'Expired']
+        && data.createdAt is timestamp
+        && data.updatedAt is timestamp;
+    }
+
+    function hasValidPromiseKeysOnCreate(data) {
+      return data.keys().hasAll([
+          'userId', 'complaintId', 'ticketCode', 'title', 'dueDateIso',
+          'progressPercent', 'status', 'createdAt', 'updatedAt'
+        ])
+        && data.keys().hasOnly([
+          'userId', 'complaintId', 'ticketCode', 'title', 'dueDateIso',
+          'progressPercent', 'status', 'createdAt', 'updatedAt'
+        ]);
+    }
+
+    // Validation Blueprint: NotificationItem
+    function isValidNotificationItem(data) {
+      return data.userId is string
+        && isValidId(data.userId)
+        && data.userId == request.auth.uid
+        && data.complaintId is string && isValidId(data.complaintId)
+        && data.ticketCode is string && data.ticketCode.size() >= 3 && data.ticketCode.size() <= 32
+        && data.type in ['Agent Reply', 'AI Analysis', 'Promise Met', 'Progress Update', 'Resolution Confirm']
+        && data.title is string && data.title.size() >= 1 && data.title.size() <= 120
+        && data.message is string && data.message.size() >= 1 && data.message.size() <= 500
+        && data.previewText is string && data.previewText.size() <= 300
+        && data.progressPercent is int && data.progressPercent >= 0 && data.progressPercent <= 100
+        && data.isRead is bool
+        && data.unreadCount is int && data.unreadCount >= 0 && data.unreadCount <= 99
+        && data.createdAt is timestamp
+        && data.updatedAt is timestamp;
+    }
+
+    function hasValidNotificationKeysOnCreate(data) {
+      return data.keys().hasAll([
+          'userId', 'complaintId', 'ticketCode', 'type', 'title', 'message',
+          'previewText', 'progressPercent', 'isRead', 'unreadCount', 'createdAt', 'updatedAt'
+        ])
+        && data.keys().hasOnly([
+          'userId', 'complaintId', 'ticketCode', 'type', 'title', 'message',
+          'previewText', 'progressPercent', 'isRead', 'unreadCount', 'createdAt', 'updatedAt'
+        ]);
+    }
+
+    // Users collection (PII isolated strictly to owner)
+    match /users/{userId} {
+      allow get: if isValidId(userId) && isOwner(userId);
+      allow list: if false;
+      allow create: if isVerified()
+        && isValidId(userId)
+        && isOwner(userId)
+        && hasValidUserProfileKeysOnCreate(incoming())
+        && isValidUserProfile(incoming())
+        && incoming().createdAt == request.time
+        && incoming().updatedAt == request.time;
+      allow update: if isVerified()
+        && isValidId(userId)
+        && isOwner(userId)
+        && isValidUserProfile(incoming())
+        && incoming().uid == existing().uid
+        && incoming().createdAt == existing().createdAt
+        && incoming().updatedAt == request.time
+        && (
+          incoming().diff(existing()).affectedKeys().hasOnly([
+            'fullName', 'email', 'mobileNumber', 'dateOfBirth', 'occupation', 'location', 'updatedAt'
+          ])
+          || incoming().diff(existing()).affectedKeys().hasOnly([
+            'notifyEmail', 'notifySms', 'notifyPromise', 'notifyCommunity', 'updatedAt'
+          ])
+        );
+      allow delete: if false;
+    }
+
+    // Complaints collection
+    match /complaints/{complaintId} {
+      allow get: if isValidId(complaintId) && isSignedIn() && existing().userId == request.auth.uid;
+      allow list: if isSignedIn() && resource.data.userId == request.auth.uid;
+      allow create: if isVerified()
+        && isValidId(complaintId)
+        && hasValidComplaintKeysOnCreate(incoming())
+        && isValidComplaint(incoming())
+        && incoming().createdAt == request.time
+        && incoming().updatedAt == request.time;
+      allow update: if isVerified()
+        && isValidId(complaintId)
+        && existing().userId == request.auth.uid
+        && existing().status != 'Resolved'
+        && isValidComplaint(incoming())
+        && incoming().userId == existing().userId
+        && incoming().ticketCode == existing().ticketCode
+        && incoming().createdAt == existing().createdAt
+        && incoming().updatedAt == request.time
+        && (
+          // Action: Edit or submit a Draft complaint
+          (existing().status == 'Draft' && incoming().diff(existing()).affectedKeys().hasOnly([
+            'title', 'category', 'orderId', 'description', 'priority', 'status',
+            'currentStep', 'aiClassification', 'aiClarityScore', 'aiSuggestion',
+            'estimatedResolution', 'assignedTeam', 'attachments', 'latestUpdateNote', 'updatedAt'
+          ]))
+          ||
+          // Action: Escalate or update progress note
+          (incoming().diff(existing()).affectedKeys().hasOnly([
+            'priority', 'status', 'currentStep', 'latestUpdateNote', 'updatedAt'
+          ]))
+          ||
+          // Action: Confirm or reopen resolution
+          (incoming().diff(existing()).affectedKeys().hasOnly([
+            'status', 'currentStep', 'rating', 'feedbackText', 'latestUpdateNote', 'updatedAt'
+          ]))
+        );
+      allow delete: if isVerified()
+        && isValidId(complaintId)
+        && existing().userId == request.auth.uid
+        && existing().status == 'Draft';
+
+      // Subcollection: Complaint timeline & chat events (Master Gate)
+      match /events/{eventId} {
+        allow get: if isValidId(complaintId)
+          && isValidId(eventId)
+          && isSignedIn()
+          && existing().userId == request.auth.uid
+          && get(/databases/$(database)/documents/complaints/$(complaintId)).data.userId == request.auth.uid;
+        allow list: if isSignedIn() && resource.data.userId == request.auth.uid;
+        allow create: if isVerified()
+          && isValidId(complaintId)
+          && isValidId(eventId)
+          && hasValidEventKeysOnCreate(incoming())
+          && isValidComplaintEvent(incoming())
+          && incoming().createdAt == request.time
+          && exists(/databases/$(database)/documents/complaints/$(complaintId))
+          && get(/databases/$(database)/documents/complaints/$(complaintId)).data.userId == request.auth.uid;
+        allow update: if false;
+        allow delete: if false;
+      }
+    }
+
+    // Promises collection
+    match /promises/{promiseId} {
+      allow get: if isValidId(promiseId) && isSignedIn() && existing().userId == request.auth.uid;
+      allow list: if isSignedIn() && resource.data.userId == request.auth.uid;
+      allow create: if isVerified()
+        && isValidId(promiseId)
+        && hasValidPromiseKeysOnCreate(incoming())
+        && isValidPromiseItem(incoming())
+        && incoming().createdAt == request.time
+        && incoming().updatedAt == request.time
+        && exists(/databases/$(database)/documents/complaints/$(incoming().complaintId))
+        && get(/databases/$(database)/documents/complaints/$(incoming().complaintId)).data.userId == request.auth.uid;
+      allow update: if isVerified()
+        && isValidId(promiseId)
+        && existing().userId == request.auth.uid
+        && existing().status != 'Kept'
+        && isValidPromiseItem(incoming())
+        && incoming().userId == existing().userId
+        && incoming().complaintId == existing().complaintId
+        && incoming().ticketCode == existing().ticketCode
+        && incoming().createdAt == existing().createdAt
+        && incoming().updatedAt == request.time
+        && incoming().diff(existing()).affectedKeys().hasOnly([
+          'progressPercent', 'status', 'updatedAt'
+        ]);
+      allow delete: if false;
+    }
+
+    // Notifications collection
+    match /notifications/{notificationId} {
+      allow get: if isValidId(notificationId) && isSignedIn() && existing().userId == request.auth.uid;
+      allow list: if isSignedIn() && resource.data.userId == request.auth.uid;
+      allow create: if isVerified()
+        && isValidId(notificationId)
+        && hasValidNotificationKeysOnCreate(incoming())
+        && isValidNotificationItem(incoming())
+        && incoming().createdAt == request.time
+        && incoming().updatedAt == request.time
+        && exists(/databases/$(database)/documents/complaints/$(incoming().complaintId))
+        && get(/databases/$(database)/documents/complaints/$(incoming().complaintId)).data.userId == request.auth.uid;
+      allow update: if isVerified()
+        && isValidId(notificationId)
+        && existing().userId == request.auth.uid
+        && isValidNotificationItem(incoming())
+        && incoming().userId == existing().userId
+        && incoming().complaintId == existing().complaintId
+        && incoming().ticketCode == existing().ticketCode
+        && incoming().createdAt == existing().createdAt
+        && incoming().updatedAt == request.time
+        && incoming().diff(existing()).affectedKeys().hasOnly([
+          'isRead', 'unreadCount', 'updatedAt'
+        ]);
+      allow delete: if false;
+    }
+  }
+}

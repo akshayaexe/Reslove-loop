@@ -1,0 +1,460 @@
+{
+  "entities": {
+    "UserProfile": {
+      "title": "UserProfile",
+      "description": "Authenticated customer profile, notification preferences, and security metadata.",
+      "type": "object",
+      "properties": {
+        "uid": {
+          "type": "string",
+          "description": "Firebase Auth UID",
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "fullName": {
+          "type": "string",
+          "description": "User full name",
+          "maxLength": 120
+        },
+        "email": {
+          "type": "string",
+          "format": "email",
+          "description": "User email address",
+          "maxLength": 180
+        },
+        "mobileNumber": {
+          "type": "string",
+          "description": "User mobile number",
+          "maxLength": 32
+        },
+        "dateOfBirth": {
+          "type": "string",
+          "description": "Date of birth formatted YYYY-MM-DD",
+          "maxLength": 20
+        },
+        "occupation": {
+          "type": "string",
+          "description": "User occupation",
+          "maxLength": 100
+        },
+        "location": {
+          "type": "string",
+          "description": "City and country",
+          "maxLength": 100
+        },
+        "notifyEmail": {
+          "type": "boolean",
+          "description": "Email updates preference"
+        },
+        "notifySms": {
+          "type": "boolean",
+          "description": "SMS alerts preference"
+        },
+        "notifyPromise": {
+          "type": "boolean",
+          "description": "Promise reminders preference"
+        },
+        "notifyCommunity": {
+          "type": "boolean",
+          "description": "Community alerts preference"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Profile creation timestamp"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Last update timestamp"
+        }
+      },
+      "required": [
+        "uid",
+        "fullName",
+        "email",
+        "mobileNumber",
+        "dateOfBirth",
+        "occupation",
+        "location",
+        "notifyEmail",
+        "notifySms",
+        "notifyPromise",
+        "notifyCommunity",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "Complaint": {
+      "title": "Complaint",
+      "description": "Customer complaint record with AI triage, progress step, assigned agent, and resolution confirmation.",
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "description": "Owner Firebase Auth UID",
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "ticketCode": {
+          "type": "string",
+          "description": "Human-readable ticket code such as #CMP-0187",
+          "maxLength": 32
+        },
+        "title": {
+          "type": "string",
+          "description": "Complaint summary title",
+          "maxLength": 160
+        },
+        "category": {
+          "type": "string",
+          "description": "Complaint category",
+          "maxLength": 80
+        },
+        "orderId": {
+          "type": "string",
+          "description": "Order or reference identifier",
+          "maxLength": 64
+        },
+        "description": {
+          "type": "string",
+          "description": "Detailed description of the issue",
+          "maxLength": 2000
+        },
+        "priority": {
+          "type": "string",
+          "enum": ["Low", "Medium", "High", "Critical"],
+          "description": "Urgency level"
+        },
+        "status": {
+          "type": "string",
+          "enum": ["Draft", "In Progress", "Awaiting Confirmation", "Resolved", "Escalated"],
+          "description": "Workflow status"
+        },
+        "currentStep": {
+          "type": "integer",
+          "description": "Progress step from 1 to 6"
+        },
+        "assignedAgentName": {
+          "type": "string",
+          "description": "Assigned support specialist name",
+          "maxLength": 100
+        },
+        "assignedAgentRole": {
+          "type": "string",
+          "description": "Assigned specialist role",
+          "maxLength": 100
+        },
+        "assignedAgentRating": {
+          "type": "number",
+          "description": "Agent average rating"
+        },
+        "aiClassification": {
+          "type": "string",
+          "description": "AI classification label",
+          "maxLength": 120
+        },
+        "aiClarityScore": {
+          "type": "integer",
+          "description": "AI clarity percentage 0 to 100"
+        },
+        "aiSuggestion": {
+          "type": "string",
+          "description": "Actionable suggestion for resolution",
+          "maxLength": 500
+        },
+        "estimatedResolution": {
+          "type": "string",
+          "description": "Estimated resolution window",
+          "maxLength": 80
+        },
+        "assignedTeam": {
+          "type": "string",
+          "description": "Support team assigned",
+          "maxLength": 100
+        },
+        "attachments": {
+          "type": "array",
+          "description": "List of uploaded attachment filenames"
+        },
+        "latestUpdateNote": {
+          "type": "string",
+          "description": "Latest agent update summary",
+          "maxLength": 500
+        },
+        "resolutionSummary": {
+          "type": "array",
+          "description": "Checklist of completed resolution actions"
+        },
+        "rating": {
+          "type": "integer",
+          "description": "Customer rating 0 to 5"
+        },
+        "feedbackText": {
+          "type": "string",
+          "description": "Customer resolution feedback",
+          "maxLength": 1000
+        },
+        "resolvedInDays": {
+          "type": "integer",
+          "description": "Days taken to resolve"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Complaint creation timestamp"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Last update timestamp"
+        }
+      },
+      "required": [
+        "userId",
+        "ticketCode",
+        "title",
+        "category",
+        "orderId",
+        "description",
+        "priority",
+        "status",
+        "currentStep",
+        "assignedAgentName",
+        "assignedAgentRole",
+        "assignedAgentRating",
+        "aiClassification",
+        "aiClarityScore",
+        "aiSuggestion",
+        "estimatedResolution",
+        "assignedTeam",
+        "attachments",
+        "latestUpdateNote",
+        "resolutionSummary",
+        "rating",
+        "feedbackText",
+        "resolvedInDays",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "ComplaintEvent": {
+      "title": "ComplaintEvent",
+      "description": "Timeline update or chat message within a complaint.",
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "description": "Owner Firebase Auth UID",
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "title": {
+          "type": "string",
+          "description": "Event headline",
+          "maxLength": 160
+        },
+        "description": {
+          "type": "string",
+          "description": "Event message details",
+          "maxLength": 500
+        },
+        "senderType": {
+          "type": "string",
+          "enum": ["system", "agent", "customer", "ai"],
+          "description": "Who generated the event"
+        },
+        "senderName": {
+          "type": "string",
+          "description": "Display name of sender",
+          "maxLength": 100
+        },
+        "tag": {
+          "type": "string",
+          "description": "Optional classification tag",
+          "maxLength": 80
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Event timestamp"
+        }
+      },
+      "required": [
+        "userId",
+        "title",
+        "description",
+        "senderType",
+        "senderName",
+        "tag",
+        "createdAt"
+      ]
+    },
+    "PromiseItem": {
+      "title": "PromiseItem",
+      "description": "Service-level promise countdown tracked against a complaint.",
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "description": "Owner Firebase Auth UID",
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "complaintId": {
+          "type": "string",
+          "description": "Linked complaint document ID",
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "ticketCode": {
+          "type": "string",
+          "description": "Linked ticket code",
+          "maxLength": 32
+        },
+        "title": {
+          "type": "string",
+          "description": "Promise milestone title",
+          "maxLength": 160
+        },
+        "dueDateIso": {
+          "type": "string",
+          "description": "ISO timestamp deadline",
+          "maxLength": 40
+        },
+        "progressPercent": {
+          "type": "integer",
+          "description": "Progress percentage 0 to 100"
+        },
+        "status": {
+          "type": "string",
+          "enum": ["Active", "Kept", "At Risk", "Expired"],
+          "description": "Promise SLA state"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Promise creation timestamp"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Last update timestamp"
+        }
+      },
+      "required": [
+        "userId",
+        "complaintId",
+        "ticketCode",
+        "title",
+        "dueDateIso",
+        "progressPercent",
+        "status",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "NotificationItem": {
+      "title": "NotificationItem",
+      "description": "Real-time notification alert for complaint updates and promises.",
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "description": "Owner Firebase Auth UID",
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "complaintId": {
+          "type": "string",
+          "description": "Linked complaint document ID",
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "ticketCode": {
+          "type": "string",
+          "description": "Linked ticket code",
+          "maxLength": 32
+        },
+        "type": {
+          "type": "string",
+          "enum": ["Agent Reply", "AI Analysis", "Promise Met", "Progress Update", "Resolution Confirm"],
+          "description": "Notification category"
+        },
+        "title": {
+          "type": "string",
+          "description": "Notification heading",
+          "maxLength": 120
+        },
+        "message": {
+          "type": "string",
+          "description": "Primary notification text",
+          "maxLength": 500
+        },
+        "previewText": {
+          "type": "string",
+          "description": "Optional message excerpt",
+          "maxLength": 300
+        },
+        "progressPercent": {
+          "type": "integer",
+          "description": "Optional progress indicator 0 to 100"
+        },
+        "isRead": {
+          "type": "boolean",
+          "description": "Read status"
+        },
+        "unreadCount": {
+          "type": "integer",
+          "description": "Badge count for notification"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Notification creation timestamp"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Last update timestamp"
+        }
+      },
+      "required": [
+        "userId",
+        "complaintId",
+        "ticketCode",
+        "type",
+        "title",
+        "message",
+        "previewText",
+        "progressPercent",
+        "isRead",
+        "unreadCount",
+        "createdAt",
+        "updatedAt"
+      ]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": { "$ref": "#/entities/UserProfile" },
+      "description": "Owner-only user profile and notification preferences."
+    },
+    "/complaints/{complaintId}": {
+      "schema": { "$ref": "#/entities/Complaint" },
+      "description": "Customer complaints owned by userId."
+    },
+    "/complaints/{complaintId}/events/{eventId}": {
+      "schema": { "$ref": "#/entities/ComplaintEvent" },
+      "description": "Chronological timeline updates and support chat messages for a complaint."
+    },
+    "/promises/{promiseId}": {
+      "schema": { "$ref": "#/entities/PromiseItem" },
+      "description": "SLA promise deadlines tied to a user's complaints."
+    },
+    "/notifications/{notificationId}": {
+      "schema": { "$ref": "#/entities/NotificationItem" },
+      "description": "User alerts for agent replies, AI analysis, promise milestones, and confirmation requests."
+    }
+  }
+}

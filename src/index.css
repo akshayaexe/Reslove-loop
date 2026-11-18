@@ -1,0 +1,79 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --font-display: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+    --font-sans: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+  }
+
+  body {
+    font-family: var(--font-sans);
+    background-color: #f8f6f3;
+    color: #0f172a;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  h1, h2, h3, h4, .font-display {
+    font-family: var(--font-display);
+  }
+
+  .font-mono-nums {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+}
+
+.rl-pastel-canvas {
+  background: linear-gradient(
+    135deg,
+    #bdf2e1 0%,
+    #e5f7f0 32%,
+    #faf6f2 62%,
+    #fbd8cb 100%
+  );
+}
+
+.rl-workspace-canvas {
+  background: linear-gradient(
+    135deg,
+    #f6fbf9 0%,
+    #faf7f4 55%,
+    #fdf0ea 100%
+  );
+}
+
+.rl-sidebar-gradient {
+  background: linear-gradient(180deg, #52dfb4 0%, #24c393 52%, #18b086 100%);
+}
+
+.rl-coral-btn {
+  background: linear-gradient(180deg, #ff6c4d 0%, #f04f2d 100%);
+  box-shadow: 0 8px 18px -6px rgba(240, 79, 45, 0.45);
+}
+
+.rl-coral-btn:hover {
+  background: linear-gradient(180deg, #ff5d3a 0%, #e04322 100%);
+}
+
+.rl-teal-btn {
+  background: linear-gradient(180deg, #27cfa0 0%, #10a97f 100%);
+  box-shadow: 0 8px 18px -6px rgba(16, 169, 127, 0.35);
+}
+
+.rl-teal-btn:hover {
+  background: linear-gradient(180deg, #1fc193 0%, #0d9670 100%);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

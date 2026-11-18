@@ -1,0 +1,6 @@
+{
+  "name": "ResolveLoop",
+  "description": "Smart complaint management, live progress tracking, SLA promise tracker, and AI-assisted resolution platform.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
